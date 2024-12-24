@@ -1,0 +1,68 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.oleynik'
+version = '1.0.0-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+bootJar {
+	launchScript()
+	archiveBaseName.set('pdfss')
+}
+
+jar {
+	enabled = false
+}
+
+springBoot {
+	mainClass.set('com.oleynik.pdfss.PdfssApplication')
+	buildInfo()
+}
+
+tasks.withType(Test).configureEach {
+	useJUnitPlatform()
+	testLogging.showStandardStreams = true
+	systemProperty('file.encoding', 'UTF-8')
+	systemProperty('user.country', 'US')
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web-services'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+
+	implementation 'org.apache.commons:commons-lang3'
+	implementation 'commons-beanutils:commons-beanutils:1.9.4'
+
+	implementation 'com.itextpdf:itext-core:8.0.5'
+
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

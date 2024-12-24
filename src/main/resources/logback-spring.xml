@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="APP_NAME" value="pdfss"/>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="default">
+
+        <property name="LOG_FILE" value="${java.io.tmpdir}/${APP_NAME}.log"/>
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>${LOG_FILE}</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%d %p %t %c{60}:%L - %X{IP} - %m%n</pattern>
+            </encoder>
+        </appender>
+
+        <property name="LOG_FILE_ERR" value="${java.io.tmpdir}/${APP_NAME}_errors.log"/>
+        <appender name="FILE_ERR" class="ch.qos.logback.core.FileAppender">
+            <file>${LOG_FILE_ERR}</file>
+            <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                <level>ERROR</level>
+                <onMatch>ACCEPT</onMatch>
+                <onMismatch>DENY</onMismatch>
+            </filter>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%d %p %t %c{60}:%L - %X{IP} - %m%n</pattern>
+            </encoder>
+        </appender>
+
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%d %p %t %c{60}:%L - %X{IP} - %m%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="FILE" />
+            <appender-ref ref="FILE_ERR" />
+        </root>
+    </springProfile>
+    <springProfile name="prod">
+        <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+            <syslogHost>my-syslog</syslogHost>
+            <port>514</port>
+            <facility>USER</facility>
+            <suffixPattern>${APP_NAME}:%d %p %t %c{60}:%L - %X{IP} - %replace(%m){'\n','#010'} %replace(%rEx){'\n','#010'}%n</suffixPattern>
+            <throwableExcluded>true</throwableExcluded>
+        </appender>
+        <appender name="SYSLOG_ERR" class="ch.qos.logback.classic.net.SyslogAppender">
+            <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                <level>ERROR</level>
+                <onMatch>ACCEPT</onMatch>
+                <onMismatch>DENY</onMismatch>
+            </filter>
+            <syslogHost>my-syslog</syslogHost>
+            <port>514</port>
+            <facility>USER</facility>
+            <suffixPattern>${APP_NAME}_errors:%d %p %t %c{60}:%L - %X{IP} - %replace(%m){'\n','#010'} %replace(%rEx){'\n','#010'}%n</suffixPattern>
+            <throwableExcluded>true</throwableExcluded>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="SYSLOG" />
+            <appender-ref ref="SYSLOG_ERR" />
+        </root>
+    </springProfile>
+
+</configuration>
